@@ -1,1 +1,1 @@
-export const COUNTRIES_API = "https://jsonplaceholder.typicode.com/posts";
+export const COUNTRIES_API = "http://localhost:8080/api/countries";

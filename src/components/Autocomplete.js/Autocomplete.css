@@ -31,3 +31,7 @@
   cursor: pointer;
   font-weight: 700;
 }
+
+.suggestions li:focus {
+  
+}

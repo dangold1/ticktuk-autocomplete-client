@@ -5,6 +5,7 @@ import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
 import { COUNTRIES_API } from "../../api/countries";
+import clsx from "clsx";
 
 const useStyles = makeStyles((theme) => ({
   searchInput: {
@@ -22,31 +23,39 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Autocomplete = (props) => {
+const Autocomplete = () => {
   const classes = useStyles();
   const [activeIndex, setActiveIndex] = useState(0);
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [userInput, setUserInput] = useState("");
 
+  useEffect(() => {
+    if (userInput[userInput.length - 1] !== "") fetchData();
+  }, [userInput]);
+
+  useEffect(() => {
+    const el = document.querySelector(".sugg-" + activeIndex);
+    el?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, [activeIndex]);
+
   const fetchData = async () => {
     try {
-      const { data } = await axios.get(COUNTRIES_API);
+      const { data } = await axios.post(COUNTRIES_API, {
+        text: userInput,
+      });
       setFilteredSuggestions(
         data.map((item) => {
-          return { code: item.userId, name: item.title };
+          return { code: item.code, name: item.name };
         })
       );
     } catch (err) {
       throw new Error(err);
     }
   };
-
-  useEffect(() => {
-    fetchData();
-  }, [userInput]);
-
-  console.log({ filteredSuggestions });
 
   const onChange = (event) => {
     setUserInput(event.currentTarget.value);
@@ -63,22 +72,42 @@ const Autocomplete = (props) => {
 
   const onKeyDown = (event) => {
     if (event.keyCode === 13) {
-      setUserInput(filteredSuggestions[activeIndex]);
+      setUserInput(filteredSuggestions[activeIndex].name);
       setActiveIndex(0);
       setShowSuggestions(false);
     } else if (event.keyCode === 38) {
       // User pressed the up arrow, decrement index
-      if (activeIndex === 0) {
-        return;
-      }
+      if (activeIndex === 0) return;
       setActiveIndex((prev) => prev - 1);
     } else if (event.keyCode === 40) {
       // User pressed the down arrow, increment index
-      if (activeIndex - 1 === filteredSuggestions.length) {
-        return;
-      }
+      if (activeIndex - 1 === filteredSuggestions.length) return;
       setActiveIndex((prev) => prev + 1);
     }
+  };
+
+  const isDisplaySuggestions =
+    showSuggestions && userInput !== "" && filteredSuggestions.length > 0;
+
+  const Suggestions = () => {
+    return (
+      <ul className="suggestions">
+        {filteredSuggestions.map((suggestion, index) => {
+          return (
+            <li
+              className={clsx(
+                "suggestion sugg-" + index,
+                index === activeIndex && "suggestion-active"
+              )}
+              key={suggestion.code}
+              onClick={onClick}
+            >
+              {suggestion.name}
+            </li>
+          );
+        })}
+      </ul>
+    );
   };
 
   return (
@@ -92,26 +121,13 @@ const Autocomplete = (props) => {
         onChange={onChange}
         onKeyDown={onKeyDown}
         value={userInput}
-        defaultValue=""
         InputProps={{
           disableUnderline: true,
           style: { fontFamily: "Arial", color: "white" },
           startAdornment: <SearchIcon />,
         }}
       />
-      {showSuggestions && userInput !== "" && filteredSuggestions.length > 0 && (
-        <ul class="suggestions">
-          {filteredSuggestions.map((suggestion, index) => (
-            <li
-              className={index === activeIndex && "suggestion"}
-              key={suggestion.code}
-              onClick={onClick}
-            >
-              {suggestion.name}
-            </li>
-          ))}
-        </ul>
-      )}
+      {isDisplaySuggestions && Suggestions()}
     </div>
   );
 };
