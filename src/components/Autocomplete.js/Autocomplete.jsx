@@ -89,7 +89,7 @@ const Autocomplete = () => {
   const isDisplaySuggestions =
     showSuggestions && userInput !== "" && filteredSuggestions.length > 0;
 
-  const Suggestions = () => {
+  const renderSuggestions = () => {
     return (
       <ul className="suggestions">
         {filteredSuggestions.map((suggestion, index) => {
@@ -127,7 +127,7 @@ const Autocomplete = () => {
           startAdornment: <SearchIcon />,
         }}
       />
-      {isDisplaySuggestions && Suggestions()}
+      {isDisplaySuggestions && renderSuggestions()}
     </div>
   );
 };
