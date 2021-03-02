@@ -1,0 +1,33 @@
+.autocomplete {
+  width: 280px;
+}
+
+.MuiSvgIcon-root {
+  padding: 5px;
+}
+
+.suggestions {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-top-width: 0;
+  list-style: none;
+  margin-top: 0;
+  max-height: 200px;
+  padding: 0;
+  overflow-y: auto;
+  width: 293px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+}
+
+.suggestions li {
+  padding: 0.8rem;
+}
+
+.suggestion-active,
+.suggestions li:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  font-weight: 700;
+}
