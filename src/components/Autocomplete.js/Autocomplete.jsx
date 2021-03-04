@@ -6,6 +6,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
 import { COUNTRIES_API } from "../../api/countries";
 import clsx from "clsx";
+import { debounce } from "lodash";
 
 const useStyles = makeStyles((theme) => ({
   searchInput: {
@@ -35,8 +36,9 @@ const Autocomplete = () => {
   }, [userInput]);
 
   useEffect(() => {
-    const el = document.querySelector(".sugg-" + activeIndex);
-    el?.scrollIntoView({
+    // Scroll onClick up/down arrow key at suggestions dropdown
+    const suggEl = document.querySelector(".sugg-" + activeIndex);
+    suggEl?.scrollIntoView({
       behavior: "smooth",
       block: "start",
     });
@@ -44,9 +46,7 @@ const Autocomplete = () => {
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.post(COUNTRIES_API, {
-        text: userInput,
-      });
+      const { data } = await axios.post(COUNTRIES_API, { text: userInput });
       setFilteredSuggestions(
         data.map((item) => {
           return { code: item.code, name: item.name };
@@ -57,10 +57,16 @@ const Autocomplete = () => {
     }
   };
 
-  const onChange = (event) => {
-    setUserInput(event.currentTarget.value);
+  const delayedHandleChange = debounce((eventData) => {
+    setUserInput(eventData);
     setActiveIndex(0);
     setShowSuggestions(true);
+  }, 30);
+
+  const onChange = (event) => {
+    /* signal to React not to nullify the event object */
+    event.persist();
+    delayedHandleChange(event.currentTarget.value);
   };
 
   const onClick = (event) => {
